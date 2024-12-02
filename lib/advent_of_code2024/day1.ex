@@ -27,7 +27,8 @@ defmodule AdventOfCode2024.Day1 do
 
     input
     |> Enum.zip()
-    |> Enum.reduce(0, fn {left, right}, acc -> abs(left - right) + acc end)
+    |> Enum.map(fn {left, right} -> abs(left - right) end)
+    |> Enum.sum()
   end
 
   def part_two(input) do
@@ -35,9 +36,8 @@ defmodule AdventOfCode2024.Day1 do
 
     frequencies = Enum.frequencies(right)
 
-    Enum.reduce(left, 0, fn elem, acc ->
-      multiplier = frequencies[elem] || 0
-      acc + elem * multiplier
-    end)
+    left
+    |> Enum.map(&(&1 * (frequencies[&1] || 0)))
+    |> Enum.sum()
   end
 end
