@@ -5,13 +5,13 @@ defmodule AdventOfCode2024.Day<%= day %>Test do
     input = """
     """
 
-    assert AdventOfCode2024.Day<%= day %>.part_one(input) == 11
+    assert AdventOfCode2024.Day<%= day %>.part_one(input) == 0
   end
 
   test "part_two/1" do
     input = """
     """
 
-    assert AdventOfCode2024.Day<%= day %>.part_two(input) == 31
+    assert AdventOfCode2024.Day<%= day %>.part_two(input) == 0
   end
 end

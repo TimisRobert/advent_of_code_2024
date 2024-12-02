@@ -18,7 +18,7 @@ defmodule AdventOfCode2024 do
     |> repeat(ignore(whitespace()))
   end
 
-  for day <- 1..1 do
+  for day <- 1..2 do
     def solve_day(unquote(day) = day) do
       input =
         Application.app_dir(:advent_of_code_2024)

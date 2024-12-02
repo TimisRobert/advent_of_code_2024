@@ -22,13 +22,15 @@ defmodule AdventOfCode2024.Day1 do
     {rest, args, context}
   end
 
-  def add_distances(input) do
+  def part_one(input) do
     {:ok, input, _, _, _, _} = parse_input(input)
-    input = Enum.zip(input)
-    Enum.reduce(input, 0, fn {left, right}, acc -> abs(left - right) + acc end)
+
+    input
+    |> Enum.zip()
+    |> Enum.reduce(0, fn {left, right}, acc -> abs(left - right) + acc end)
   end
 
-  def similarity_score(input) do
+  def part_two(input) do
     {:ok, [left, right], _, _, _, _} = parse_input(input)
 
     frequencies = Enum.frequencies(right)
@@ -38,7 +40,4 @@ defmodule AdventOfCode2024.Day1 do
       acc + elem * multiplier
     end)
   end
-
-  def part_one(input), do: add_distances(input)
-  def part_two(input), do: similarity_score(input)
 end
