@@ -1,0 +1,13 @@
+defmodule AdventOfCode2024.Day<%= day %> do
+  use AdventOfCode2024
+
+  defparsec :parse_input, ignore()
+
+  def part_one(input) do
+    0
+  end
+
+  def part_two(input) do
+    0
+  end
+end
