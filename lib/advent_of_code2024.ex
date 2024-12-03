@@ -18,7 +18,14 @@ defmodule AdventOfCode2024 do
     |> repeat(ignore(whitespace()))
   end
 
-  for day <- 1..2 do
+  days =
+    Application.app_dir(:advent_of_code_2024)
+    |> Path.join("/priv")
+    |> File.ls!()
+    |> Enum.filter(fn path -> path =~ "day" end)
+    |> Enum.count()
+
+  for day <- 1..days do
     def solve_day(unquote(day) = day) do
       input =
         Application.app_dir(:advent_of_code_2024)

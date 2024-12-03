@@ -14,9 +14,9 @@ defmodule AdventOfCode2024.Day1 do
   defp zip(rest, args, context, _line, _offset) do
     args =
       args
-      |> Enum.reduce([[], []], fn [one, two], [left, right] ->
-        [[one | left], [two | right]]
-      end)
+      |> Enum.map(&List.to_tuple/1)
+      |> Enum.unzip()
+      |> Tuple.to_list()
       |> Enum.map(&Enum.sort/1)
 
     {rest, args, context}
@@ -37,7 +37,7 @@ defmodule AdventOfCode2024.Day1 do
     frequencies = Enum.frequencies(right)
 
     left
-    |> Enum.map(&(&1 * (frequencies[&1] || 0)))
+    |> Enum.map(&(&1 * Map.get(frequencies, &1, 0)))
     |> Enum.sum()
   end
 end
