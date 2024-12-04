@@ -6,24 +6,24 @@ defmodule AdventOfCode2024.Day4 do
 
     for {line, y} <- Enum.with_index(lines),
         {letter, x} <- line |> String.graphemes() |> Enum.with_index(),
-        reduce: Map.new() do
-      map ->
-        map
-        |> Map.put({x, y}, letter)
-        |> Map.update(:max_x, 0, &if(x > &1, do: x, else: &1))
-        |> Map.update(:max_y, 0, &if(y > &1, do: y, else: &1))
+        into: Map.new() do
+      {{x, y}, letter}
     end
   end
+
+  def xmas?("XMAS"), do: true
+  def xmas?("SAMX"), do: true
+  def xmas?(_), do: false
 
   defp count_xmas(map, {x_start, y_start}) do
     directions = for x <- -1..1, y <- -1..1, do: {x, y}
 
     for {x_dir, y_dir} <- directions do
-      for step <- 0..3, into: "" do
-        Map.get(map, {x_dir * step + x_start, y_dir * step + y_start}, "")
-      end
+      for step <- 0..3,
+          into: "",
+          do: Map.get(map, {x_dir * step + x_start, y_dir * step + y_start}, "")
     end
-    |> Enum.count(&(&1 in ~w(XMAS SAMX)))
+    |> Enum.count(&xmas?/1)
   end
 
   def part_one(input) do
@@ -42,8 +42,7 @@ defmodule AdventOfCode2024.Day4 do
   defp x_mas?(_), do: false
 
   defp count_x_mas(map) do
-    max_x = Map.fetch!(map, :max_x)
-    max_y = Map.fetch!(map, :max_y)
+    {max_x, max_y} = Enum.max(Map.keys(map))
 
     for y <- 0..(max_y - 2), x <- 0..(max_x - 2) do
       for y <- y..(y + 2), x <- x..(x + 2), into: "", do: Map.get(map, {x, y})
