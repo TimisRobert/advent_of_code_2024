@@ -43,15 +43,15 @@ defmodule AdventOfCode2024.Day3 do
     {:ok, input, _, _, _, _} = parse_input_two(input)
 
     input
-    |> Enum.map_reduce(
-      true,
+    |> Enum.reduce(
+      {0, true},
       fn
-        :do, _ -> {0, true}
-        :dont, _ -> {0, false}
-        [one, two], true -> {one * two, true}
-        [_, _], false -> {0, false}
+        :do, {total, _} -> {total, true}
+        :dont, {total, _} -> {total, false}
+        [one, two], {total, true} -> {total + one * two, true}
+        [_, _], {total, false} -> {total, false}
       end
     )
-    |> then(&Enum.sum(elem(&1, 0)))
+    |> elem(0)
   end
 end
