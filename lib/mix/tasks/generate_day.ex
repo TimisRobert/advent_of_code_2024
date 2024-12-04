@@ -5,6 +5,10 @@ defmodule Mix.Tasks.GenerateDay do
   def run([day]) do
     app_dir = Application.app_dir(:advent_of_code_2024)
 
+    app_dir
+    |> Path.join("/priv/day#{day}.txt")
+    |> File.write!("")
+
     day_template =
       app_dir
       |> Path.join("/priv/day_template.eex")
