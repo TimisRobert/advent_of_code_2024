@@ -29,10 +29,12 @@ defmodule AdventOfCode2024.Day4 do
   def part_one(input) do
     map = parse_input(input)
 
-    for {coordinates, letter} <- map, letter in ~w(X S), reduce: 0 do
-      total -> total + count_xmas(map, coordinates) / 2
-    end
-    |> trunc()
+    total =
+      for {coordinates, letter} <- map, letter in ~w(X S), reduce: 0 do
+        total -> total + count_xmas(map, coordinates)
+      end
+
+    div(total, 2)
   end
 
   defp x_mas?(<<"M", _, "S", _, "A", _, "M", _, "S">>), do: true
