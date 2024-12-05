@@ -2,9 +2,7 @@ defmodule AdventOfCode2024.Day4 do
   use AdventOfCode2024
 
   def parse_input(input) do
-    lines = String.split(input, "\n")
-
-    for {line, y} <- Enum.with_index(lines),
+    for {line, y} <- input |> String.split("\n") |> Enum.with_index(),
         {letter, x} <- line |> String.graphemes() |> Enum.with_index(),
         into: Map.new() do
       {{x, y}, letter}
@@ -16,12 +14,10 @@ defmodule AdventOfCode2024.Day4 do
   def xmas?(_), do: false
 
   defp count_xmas(map, {x_start, y_start}) do
-    directions = for x <- -1..1, y <- -1..1, do: {x, y}
-
-    for {x_dir, y_dir} <- directions do
+    for x <- -1..1, y <- -1..1 do
       for step <- 0..3,
           into: "",
-          do: Map.get(map, {x_dir * step + x_start, y_dir * step + y_start}, "")
+          do: Map.get(map, {x * step + x_start, y * step + y_start}, "")
     end
     |> Enum.count(&xmas?/1)
   end
