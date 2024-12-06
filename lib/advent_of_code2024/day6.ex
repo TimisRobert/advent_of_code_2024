@@ -9,43 +9,44 @@ defmodule AdventOfCode2024.Day6 do
     end
   end
 
+  defp direction("^"), do: :up
+  defp direction(">"), do: :right
+  defp direction("<"), do: :left
+  defp direction("v"), do: :down
+
   defp find_guard(map) do
-    Enum.find_value(map, fn
-      {coords, "^"} -> {coords, :up}
-      {coords, ">"} -> {coords, :right}
-      {coords, "<"} -> {coords, :left}
-      {coords, "v"} -> {coords, :down}
-      _ -> false
+    Enum.find_value(map, fn {coords, direction} ->
+      if direction in ~w(^ > < v), do: {coords, direction(direction)}
     end)
   end
 
-  defp turn_right(:up), do: :right
-  defp turn_right(:right), do: :down
-  defp turn_right(:left), do: :up
-  defp turn_right(:down), do: :left
+  defp turn(:up), do: :right
+  defp turn(:right), do: :down
+  defp turn(:left), do: :up
+  defp turn(:down), do: :left
 
-  defp move_guard(map, {{x, y}, direction}) do
-    coords =
-      case direction do
-        :up -> {x, y - 1}
-        :right -> {x + 1, y}
-        :left -> {x - 1, y}
-        :down -> {x, y + 1}
-      end
+  defp move(:up, {x, y}), do: {x, y - 1}
+  defp move(:right, {x, y}), do: {x + 1, y}
+  defp move(:left, {x, y}), do: {x - 1, y}
+  defp move(:down, {x, y}), do: {x, y + 1}
 
-    map = Map.put(map, {x, y}, ".")
+  defp move_guard(map, {coords, direction}) do
+    new_coords = move(direction, coords)
+    map = Map.put(map, coords, ".")
 
-    case Map.get(map, coords) do
+    case Map.get(map, new_coords) do
       nil -> :done
-      "." -> {map, coords, direction}
-      "#" -> {map, {x, y}, turn_right(direction)}
+      "." -> {map, {new_coords, direction}}
+      "#" -> {map, {coords, turn(direction)}}
     end
   end
 
-  defp traverse_map(map, {coords, _} = position, visited \\ []) do
+  defp traverse_map(map, {coords, _} = position, visited \\ MapSet.new()) do
+    visited = MapSet.put(visited, coords)
+
     case move_guard(map, position) do
-      :done -> [coords | visited]
-      {map, coords, direction} -> traverse_map(map, {coords, direction}, [coords | visited])
+      :done -> visited
+      {map, new_position} -> traverse_map(map, new_position, visited)
     end
   end
 
@@ -53,24 +54,17 @@ defmodule AdventOfCode2024.Day6 do
     map = parse_input(input)
     position = find_guard(map)
 
-    traverse_map(map, position)
-    |> Enum.uniq()
-    |> length()
+    map
+    |> traverse_map(position)
+    |> MapSet.size()
   end
 
-  defp is_loop?(map, position, visited \\ []) do
+  defp is_loop?(map, position, visited \\ MapSet.new()) do
+    visited = MapSet.put(visited, position)
+
     case move_guard(map, position) do
-      :done ->
-        false
-
-      {map, coords, direction} ->
-        new_position = {coords, direction}
-
-        if new_position in visited do
-          true
-        else
-          is_loop?(map, new_position, [position | visited])
-        end
+      :done -> false
+      {map, new_position} -> new_position in visited || is_loop?(map, new_position, visited)
     end
   end
 
@@ -79,14 +73,11 @@ defmodule AdventOfCode2024.Day6 do
     position = find_guard(map)
     {max_x, max_y} = Enum.max(Map.keys(map))
 
-    maps =
-      for y <- 0..max_y,
-          x <- 0..max_x,
-          Map.get(map, {x, y}) == ".",
-          do: Map.put(map, {x, y}, "#")
-
-    maps
-    |> Task.async_stream(&is_loop?(&1, position))
+    for y <- 0..max_y, x <- 0..max_x, Map.get(map, {x, y}) == "." do
+      Map.put(map, {x, y}, "#")
+    end
+    |> Task.async_stream(&is_loop?(&1, position), ordered: false)
+    |> Stream.filter(&match?({:ok, true}, &1))
     |> Enum.count()
   end
 end
