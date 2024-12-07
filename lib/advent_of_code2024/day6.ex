@@ -71,13 +71,10 @@ defmodule AdventOfCode2024.Day6 do
   def part_two(input) do
     map = parse_input(input)
     position = find_guard(map)
-    {max_x, max_y} = Enum.max(Map.keys(map))
 
-    for y <- 0..max_y, x <- 0..max_x, Map.get(map, {x, y}) == "." do
-      Map.put(map, {x, y}, "#")
-    end
-    |> Task.async_stream(&is_loop?(&1, position), ordered: false)
-    |> Stream.filter(&match?({:ok, true}, &1))
-    |> Enum.count()
+    map
+    |> traverse_map(position)
+    |> Enum.map(&Map.put(map, &1, "#"))
+    |> Enum.count(&is_loop?(&1, position))
   end
 end
