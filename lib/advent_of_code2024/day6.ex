@@ -4,9 +4,8 @@ defmodule AdventOfCode2024.Day6 do
   defp parse_input(input) do
     for {line, y} <- input |> String.split("\n") |> Enum.with_index(),
         {cell, x} <- line |> String.graphemes() |> Enum.with_index(),
-        into: Map.new() do
-      {{x, y}, cell}
-    end
+        into: Map.new(),
+        do: {{x, y}, cell}
   end
 
   defp direction("^"), do: :up

@@ -4,9 +4,8 @@ defmodule AdventOfCode2024.Day4 do
   def parse_input(input) do
     for {line, y} <- input |> String.split("\n") |> Enum.with_index(),
         {letter, x} <- line |> String.graphemes() |> Enum.with_index(),
-        into: Map.new() do
-      {{x, y}, letter}
-    end
+        into: Map.new(),
+        do: {{x, y}, letter}
   end
 
   def xmas?("XMAS"), do: true
@@ -26,9 +25,10 @@ defmodule AdventOfCode2024.Day4 do
     map = parse_input(input)
 
     total =
-      for {coordinates, letter} <- map, letter in ~w(X S), reduce: 0 do
-        total -> total + count_xmas(map, coordinates)
-      end
+      for {coordinates, letter} <- map,
+          letter in ~w(X S),
+          reduce: 0,
+          do: (total -> total + count_xmas(map, coordinates))
 
     div(total, 2)
   end

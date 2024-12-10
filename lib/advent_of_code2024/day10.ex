@@ -4,9 +4,8 @@ defmodule AdventOfCode2024.Day10 do
   defp parse_input(input) do
     for {line, y} <- input |> String.split("\n") |> Enum.with_index(),
         {cell, x} <- line |> String.graphemes() |> Enum.with_index(),
-        into: Map.new() do
-      {{x, y}, String.to_integer(cell)}
-    end
+        into: Map.new(),
+        do: {{x, y}, String.to_integer(cell)}
   end
 
   defp find_higher_slopes(map, {{x, y} = coords, cell}) do
@@ -14,15 +13,12 @@ defmodule AdventOfCode2024.Day10 do
         new_coords = {x + dx, y + dy},
         new_coords != coords,
         new_cell = Map.get(map, new_coords),
-        new_cell == cell + 1 do
-      {new_coords, new_cell}
-    end
+        new_cell == cell + 1,
+        do: {new_coords, new_cell}
   end
 
   defp traverse_trailheads(map) do
-    for {_, cell} = position <- map, cell == 0 do
-      traverse_trailhead(map, position, [position])
-    end
+    for {_, cell} = position <- map, cell == 0, do: traverse_trailhead(map, position, [position])
   end
 
   defp traverse_trailhead(_map, {_, 9}, acc), do: [acc]

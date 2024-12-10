@@ -30,8 +30,7 @@ defmodule AdventOfCode2024.Day5 do
       Map.put(acc, elem, Enum.slice(updates, 0, idx - 1))
     end)
     |> Enum.all?(fn {k, v} ->
-      MapSet.intersection(MapSet.new(v), MapSet.new(Map.get(rules, k, [])))
-      |> MapSet.size() == 0
+      MapSet.size(MapSet.intersection(MapSet.new(v), MapSet.new(Map.get(rules, k, [])))) == 0
     end)
   end
 
