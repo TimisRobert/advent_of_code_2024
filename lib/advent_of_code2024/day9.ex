@@ -41,6 +41,27 @@ defmodule AdventOfCode2024.Day9 do
     |> Enum.sum()
   end
 
+  defp reorder_block({block, block_idx}, chunks) do
+    chunks
+    |> Enum.find(fn {chunk, _} -> Enum.count(chunk, &is_nil/1) >= length(block) end)
+    |> case do
+      {_, chunk_idx} when chunk_idx < block_idx ->
+        chunks
+        |> List.update_at(chunk_idx, fn {chunk, idx} ->
+          chunk
+          |> Enum.reduce({block, []}, fn
+            nil, {[h | t], acc} -> {t, [h | acc]}
+            elem, {block, acc} -> {block, [elem | acc]}
+          end)
+          |> then(&{Enum.reverse(elem(&1, 1)), idx})
+        end)
+        |> List.replace_at(block_idx, {List.duplicate(nil, length(block)), block_idx})
+
+      _ ->
+        chunks
+    end
+  end
+
   def part_two(input) do
     chunks =
       input
@@ -49,28 +70,9 @@ defmodule AdventOfCode2024.Day9 do
       |> Enum.with_index()
 
     chunks
-    |> Enum.filter(fn {chunk, _} -> Enum.all?(chunk) end)
+    |> Enum.filter(&Enum.all?(elem(&1, 0)))
     |> Enum.reverse()
-    |> Enum.reduce(chunks, fn {block, block_idx}, chunks ->
-      chunks
-      |> Enum.find(fn {chunk, _} -> Enum.count(chunk, &is_nil/1) >= length(block) end)
-      |> case do
-        {_, chunk_idx} when chunk_idx < block_idx ->
-          chunks
-          |> List.update_at(chunk_idx, fn {chunk, idx} ->
-            chunk
-            |> Enum.reduce({block, []}, fn
-              nil, {[h | t], acc} -> {t, [h | acc]}
-              elem, {block, acc} -> {block, [elem | acc]}
-            end)
-            |> then(&{Enum.reverse(elem(&1, 1)), idx})
-          end)
-          |> List.replace_at(block_idx, {List.duplicate(nil, length(block)), block_idx})
-
-        _ ->
-          chunks
-      end
-    end)
+    |> Enum.reduce(chunks, &reorder_block/2)
     |> Enum.flat_map(&elem(&1, 0))
     |> Enum.with_index()
     |> Enum.reject(&is_nil(elem(&1, 0)))
