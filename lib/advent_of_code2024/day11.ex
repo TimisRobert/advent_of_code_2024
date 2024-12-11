@@ -7,50 +7,31 @@ defmodule AdventOfCode2024.Day11 do
     |> Enum.map(&String.to_integer/1)
   end
 
-  defp blink(list) when is_list(list), do: blink(Enum.frequencies(list))
-
   defp blink(map) do
-    Enum.reduce(map, map, fn
-      {_, 0}, map ->
-        map
+    Enum.reduce(map, Map.new(), fn
+      {0, v}, map ->
+        Map.update(map, 1, v, &(&1 + v))
 
       {k, v}, map ->
-        Enum.reduce(0..(v - 1), map, fn _, map ->
-          cond do
-            k == 0 ->
-              map
-              |> Map.update(0, 0, &(&1 - 1))
-              |> Map.update(1, 1, &(&1 + 1))
+        digits = Integer.digits(k)
+        len = length(digits)
 
-            k |> Integer.digits() |> length() |> rem(2) == 0 ->
-              int = Integer.to_string(k)
+        if rem(len, 2) == 0 do
+          {left, right} = Enum.split(digits, div(len, 2))
 
-              {left, right} =
-                int
-                |> String.split_at(div(String.length(int), 2))
-
-              left = String.to_integer(left)
-              right = String.to_integer(right)
-
-              map
-              |> Map.update(k, 0, &(&1 - 1))
-              |> Map.update(left, 1, &(&1 + 1))
-              |> Map.update(right, 1, &(&1 + 1))
-
-            true ->
-              map
-              |> Map.update(k, 0, &(&1 - 1))
-              |> Map.update(k * 2024, 1, &(&1 + 1))
-          end
-        end)
+          map
+          |> Map.update(Integer.undigits(left), v, &(&1 + v))
+          |> Map.update(Integer.undigits(right), v, &(&1 + v))
+        else
+          Map.update(map, k * 2024, v, &(&1 + v))
+        end
     end)
-    |> Enum.reject(fn {_, v} -> v == 0 end)
-    |> Map.new()
   end
 
   def part_one(input) do
     input
     |> parse_input()
+    |> Enum.frequencies()
     |> Stream.iterate(&blink/1)
     |> Enum.at(25)
     |> Map.values()
@@ -60,6 +41,7 @@ defmodule AdventOfCode2024.Day11 do
   def part_two(input) do
     input
     |> parse_input()
+    |> Enum.frequencies()
     |> Stream.iterate(&blink/1)
     |> Enum.at(75)
     |> Map.values()
