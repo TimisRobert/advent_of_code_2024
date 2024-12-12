@@ -49,7 +49,58 @@ defmodule AdventOfCode2024.Day12 do
     |> Enum.sum()
   end
 
+  defp different_neighbours(map, {{x, y}, cell}) do
+    for {dx, dy} <- [{0, 1}, {0, -1}, {1, 0}, {-1, 0}],
+        coords = {x + dx, y + dy},
+        cell != Map.get(map, coords),
+        do: {coords, Map.get(map, coords)}
+  end
+
+  defp direction({x, y}, {ox, oy}) when x - ox == 1 and y - oy == 0, do: :left
+  defp direction({x, y}, {ox, oy}) when x - ox == -1 and y - oy == 0, do: :right
+  defp direction({x, y}, {ox, oy}) when x - ox == 0 and y - oy == 1, do: :top
+  defp direction({x, y}, {ox, oy}) when x - ox == 0 and y - oy == -1, do: :bottom
+
   defp calculate_sides(map, region) do
+    region
+    |> Enum.flat_map(fn {coords, _} = cell ->
+      map
+      |> different_neighbours(cell)
+      |> Enum.map(fn {ocoords, _} -> {ocoords, direction(coords, ocoords)} end)
+    end)
+    |> Enum.group_by(&elem(&1, 1))
+    |> Map.values()
+    |> Enum.flat_map(fn cells ->
+      cells
+      |> Enum.group_by(fn
+        {{_, y}, dir} when dir in ~w(top bottom)a -> y
+        {{x, _}, dir} when dir in ~w(left right)a -> x
+      end)
+      |> Map.values()
+      |> Enum.flat_map(&Enum.sort/1)
+      |> Enum.map(&elem(&1, 0))
+      |> Enum.chunk_while(
+        [],
+        fn
+          elem, [] ->
+            {:cont, [elem]}
+
+          {x, y} = elem, [{ox, oy} | _] = acc when x == ox and abs(y - oy) == 1 ->
+            {:cont, [elem | acc]}
+
+          {x, y} = elem, [{ox, oy} | _] = acc when y == oy and abs(x - ox) == 1 ->
+            {:cont, [elem | acc]}
+
+          elem, acc ->
+            {:cont, acc, [elem]}
+        end,
+        fn
+          [] -> {:cont, []}
+          acc -> {:cont, acc, []}
+        end
+      )
+    end)
+    |> Enum.count()
   end
 
   def part_one(input) do
@@ -71,14 +122,9 @@ defmodule AdventOfCode2024.Day12 do
 
     map
     |> find_regions()
-    |> Enum.filter(fn region -> Enum.all?(region, &(elem(&1, 1) == "V")) end)
     |> Enum.map(fn region ->
-      [{_, letter} | _] = region
-
       area = length(region)
       sides = calculate_sides(map, region)
-
-      IO.inspect(sides, label: letter)
 
       area * sides
     end)
