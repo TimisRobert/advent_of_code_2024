@@ -9,31 +9,29 @@ defmodule AdventOfCode2024.Day1 do
               |> concat(optional(ignore_whitespace()))
               |> wrap()
             )
-            |> post_traverse(:zip)
 
-  defp zip(rest, args, context, _line, _offset) do
-    args =
-      args
-      |> Enum.map(&List.to_tuple/1)
-      |> Enum.unzip()
-      |> Tuple.to_list()
-      |> Enum.map(&Enum.sort/1)
-
-    {rest, args, context}
+  defp into_lists(input) do
+    input
+    |> Enum.map(&List.to_tuple/1)
+    |> Enum.unzip()
+    |> Tuple.to_list()
+    |> Enum.map(&Enum.sort/1)
   end
 
   def part_one(input) do
     {:ok, input, _, _, _, _} = parse_input(input)
 
     input
+    |> into_lists()
     |> Enum.zip()
     |> Enum.map(fn {left, right} -> abs(left - right) end)
     |> Enum.sum()
   end
 
   def part_two(input) do
-    {:ok, [left, right], _, _, _, _} = parse_input(input)
+    {:ok, input, _, _, _, _} = parse_input(input)
 
+    [left, right] = into_lists(input)
     frequencies = Enum.frequencies(right)
 
     left
