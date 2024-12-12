@@ -56,48 +56,47 @@ defmodule AdventOfCode2024.Day12 do
         do: {coords, Map.get(map, coords)}
   end
 
-  defp direction({x, y}, {ox, oy}) when x - ox == 1 and y - oy == 0, do: :left
-  defp direction({x, y}, {ox, oy}) when x - ox == -1 and y - oy == 0, do: :right
-  defp direction({x, y}, {ox, oy}) when x - ox == 0 and y - oy == 1, do: :top
-  defp direction({x, y}, {ox, oy}) when x - ox == 0 and y - oy == -1, do: :bottom
+  defp direction({x, _}, {ox, _}) when x - ox == 1, do: :left
+  defp direction({x, _}, {ox, _}) when x - ox == -1, do: :right
+  defp direction({_, y}, {_, oy}) when y - oy == 1, do: :top
+  defp direction({_, y}, {_, oy}) when y - oy == -1, do: :bottom
 
   defp calculate_sides(map, region) do
     region
     |> Enum.flat_map(fn {coords, _} = cell ->
       map
       |> different_neighbours(cell)
-      |> Enum.map(fn {ocoords, _} -> {ocoords, direction(coords, ocoords)} end)
+      |> Enum.map(&{elem(&1, 0), direction(coords, elem(&1, 0))})
     end)
     |> Enum.group_by(&elem(&1, 1))
     |> Map.values()
     |> Enum.flat_map(fn cells ->
       cells
-      |> Enum.group_by(fn
-        {{_, y}, dir} when dir in ~w(top bottom)a -> y
-        {{x, _}, dir} when dir in ~w(left right)a -> x
-      end)
+      |> Enum.group_by(
+        fn
+          {{_, y}, dir} when dir in ~w(top bottom)a -> y
+          {{x, _}, dir} when dir in ~w(left right)a -> x
+        end,
+        &elem(&1, 0)
+      )
       |> Map.values()
       |> Enum.flat_map(&Enum.sort/1)
-      |> Enum.map(&elem(&1, 0))
       |> Enum.chunk_while(
         [],
         fn
           elem, [] ->
             {:cont, [elem]}
 
-          {x, y} = elem, [{ox, oy} | _] = acc when x == ox and abs(y - oy) == 1 ->
+          {x, y} = elem, [{x, oy} | _] = acc when abs(y - oy) == 1 ->
             {:cont, [elem | acc]}
 
-          {x, y} = elem, [{ox, oy} | _] = acc when y == oy and abs(x - ox) == 1 ->
+          {x, y} = elem, [{ox, y} | _] = acc when abs(x - ox) == 1 ->
             {:cont, [elem | acc]}
 
           elem, acc ->
             {:cont, acc, [elem]}
         end,
-        fn
-          [] -> {:cont, []}
-          acc -> {:cont, acc, []}
-        end
+        fn acc -> {:cont, acc, []} end
       )
     end)
     |> Enum.count()
