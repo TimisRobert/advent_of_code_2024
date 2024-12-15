@@ -37,8 +37,10 @@ defmodule AdventOfCode2024.Day7 do
   defp equation_concat?([], target, total), do: total == target
 
   defp equation_concat?([head | tail], target, total) do
+    digits = Integer.digits(total) ++ Integer.digits(head)
+
     equation_concat?(tail, target, total + head) or equation_concat?(tail, target, total * head) or
-      equation_concat?(tail, target, String.to_integer("#{total}#{head}"))
+      equation_concat?(tail, target, Integer.undigits(digits))
   end
 
   def part_two(input) do

@@ -30,12 +30,12 @@ defmodule AdventOfCode2024.Day12 do
     end
   end
 
-  defp find_regions(map, list, [head | rest] = stack, [first | last] = acc, visited) do
+  defp find_regions(map, list, [head | rest], [first | last] = acc, visited) do
     if head in visited do
       find_regions(map, list, rest, acc, visited)
     else
       neighbours = neighbours(map, head)
-      stack = stack ++ neighbours
+      stack = neighbours ++ rest
       acc = [[head | first] | last]
       visited = MapSet.put(visited, head)
 
