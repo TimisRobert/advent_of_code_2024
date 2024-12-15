@@ -93,7 +93,7 @@ defmodule AdventOfCode2024.Day14 do
     |> Stream.iterate(&move_robots(&1, size))
     |> Stream.with_index()
     |> Stream.drop_while(&(percentage_neighbour(elem(&1, 0)) < 51))
+    |> Stream.map(&elem(&1, 1))
     |> Enum.at(0)
-    |> then(&elem(&1, 1))
   end
 end

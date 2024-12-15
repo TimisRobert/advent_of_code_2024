@@ -48,12 +48,13 @@ defmodule AdventOfCode2024.Day9 do
       {_, chunk_idx} when chunk_idx < block_idx ->
         chunks
         |> List.update_at(chunk_idx, fn {chunk, idx} ->
-          chunk
-          |> Enum.reduce({block, []}, fn
-            nil, {[h | t], acc} -> {t, [h | acc]}
-            elem, {block, acc} -> {block, [elem | acc]}
-          end)
-          |> then(&{Enum.reverse(elem(&1, 1)), idx})
+          {_, list} =
+            Enum.reduce(chunk, {block, []}, fn
+              nil, {[h | t], acc} -> {t, [h | acc]}
+              elem, {block, acc} -> {block, [elem | acc]}
+            end)
+
+          {Enum.reverse(list), idx}
         end)
         |> List.replace_at(block_idx, {List.duplicate(nil, length(block)), block_idx})
 

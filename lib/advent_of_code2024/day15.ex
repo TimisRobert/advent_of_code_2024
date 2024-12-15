@@ -57,11 +57,12 @@ defmodule AdventOfCode2024.Day15 do
     {map, movements} = parse_input(input)
     position = find_robot(map)
 
-    movements
-    |> Enum.reduce({map, position}, fn movement, {map, position} ->
-      move_cell(map, position, movement)
-    end)
-    |> then(&elem(&1, 0))
+    {map, _} =
+      Enum.reduce(movements, {map, position}, fn movement, {map, position} ->
+        move_cell(map, position, movement)
+      end)
+
+    map
     |> gps_coordinates()
     |> Enum.sum()
   end
@@ -183,11 +184,12 @@ defmodule AdventOfCode2024.Day15 do
     map = scale_map(map)
     position = find_robot(map)
 
-    movements
-    |> Enum.reduce({map, position}, fn movement, {map, position} ->
-      move_cell_warehouse(map, position, movement)
-    end)
-    |> then(&elem(&1, 0))
+    {map, _} =
+      Enum.reduce(movements, {map, position}, fn movement, {map, position} ->
+        move_cell_warehouse(map, position, movement)
+      end)
+
+    map
     |> gps_coordinates_warehouse()
     |> Enum.sum()
   end
