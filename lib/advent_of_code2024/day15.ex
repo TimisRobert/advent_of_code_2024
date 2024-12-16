@@ -89,30 +89,6 @@ defmodule AdventOfCode2024.Day15 do
     end)
   end
 
-  defp move_boxes(map, position, movement) when movement in ~w(< >) do
-    new_position = shift_direction(position, movement)
-
-    new_position
-    |> Stream.iterate(&shift_direction(&1, movement))
-    |> Stream.map(&{&1, Map.get(map, &1)})
-    |> Enum.reduce_while([], fn
-      {_, sym} = cell, acc when sym in ~w(. #) -> {:halt, [cell | acc]}
-      cell, acc -> {:cont, [cell | acc]}
-    end)
-    |> case do
-      [{_, "#"} | _] ->
-        {map, position}
-
-      [{_, "."} | cells] ->
-        {cells
-         |> Enum.reduce(map, fn {position, cell}, map ->
-           Map.put(map, shift_direction(position, movement), cell)
-         end)
-         |> Map.put(position, ".")
-         |> Map.put(new_position, "@"), new_position}
-    end
-  end
-
   defp move_boxes(map, position, movement) do
     new_position = shift_direction(position, movement)
 
@@ -123,7 +99,7 @@ defmodule AdventOfCode2024.Day15 do
       boxes ->
         {boxes
          |> Enum.flat_map(&Tuple.to_list/1)
-         |> Enum.sort(if movement == "^", do: :asc, else: :desc)
+         |> Enum.sort(if movement == "^" or movement == "<", do: :asc, else: :desc)
          |> Enum.reduce(map, fn {position, cell}, map ->
            map
            |> Map.put(position, ".")
@@ -134,19 +110,22 @@ defmodule AdventOfCode2024.Day15 do
     end
   end
 
-  defp box_neighbours(map, movement, {{{lx, ly}, _}, {{rx, ry}, _}}) do
-    dy = if movement == "^", do: -1, else: 1
+  defp near_box_cells({{{lx, ly}, _}, _}, "<"), do: [{lx - 1, ly}]
+  defp near_box_cells({_, {{rx, ry}, _}}, ">"), do: [{rx + 1, ry}]
+  defp near_box_cells({{{lx, ly}, _}, {{rx, ry}, _}}, "^"), do: [{lx, ly - 1}, {rx, ry - 1}]
+  defp near_box_cells({{{lx, ly}, _}, {{rx, ry}, _}}, "v"), do: [{lx, ly + 1}, {rx, ry + 1}]
 
-    for position <- [{lx, ly + dy}, {rx, ry + dy}],
+  defp box_cell({{x, y}, "["}), do: {{{x, y}, "["}, {{x + 1, y}, "]"}}
+  defp box_cell({{x, y}, "]"}), do: {{{x - 1, y}, "["}, {{x, y}, "]"}}
+
+  defp box_neighbours(map, movement, cell) do
+    for position <- near_box_cells(cell, movement),
         sym = Map.get(map, position),
         sym in ~w(# [ ]),
         cell = {position, sym},
         uniq: true,
         do: if(sym == "#", do: cell, else: box_cell(cell))
   end
-
-  defp box_cell({{x, y}, "["}), do: {{{x, y}, "["}, {{x + 1, y}, "]"}}
-  defp box_cell({{x, y}, "]"}), do: {{{x - 1, y}, "["}, {{x, y}, "]"}}
 
   defp collect_boxes(map, position, movement) do
     cell = {position, Map.get(map, position)} |> box_cell()
